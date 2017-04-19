@@ -32,12 +32,38 @@ var app = {
 
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        console.log('Received Event: ' + id);
-        $("#button").on("click", function(e){
-          alert("you pressed me :D");
+        myDB = window.sqlitePlugin.openDatabase({name: "iwmobile.db", location: 'default'});
+
+        $("#form").on("submit", function(e) {
+          e.preventDefault();
+          myDB.transaction(function(tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS query (query_id INTERGER(11) PRIMARY KEY UNIQUE NOT NULL ,\
+              query_text VARCHAR(100) NOT NULL,\
+              player_name VARCHAR(50) DEFAULT NULL,\
+              team VARCHAR(25) DEFAULT NULL,\
+              author VARCHAR(20) DEFAULT NULL,\
+              created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS tweet (tweet_id VARCHAR(30) PRIMARY KEY UNIQUE NOT NULL ,\
+              tweet_text TEXT NOT NULL,\
+              username VARCHAR(20) NOT NULL,\
+              created_at DATETIME NOT NULL,\
+              retrieved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\
+              query_id INTERGER(11), \
+              FOREIGN KEY(query_id) REFERENCES query (query_id))');
+          }, function(error) {
+            console.log('Transaction ERROR: ' + error.message);
+          }, function(tx) {
+            console.log('Populated database OK');
+          });
+
+          myDB.executeSql('SELECT * FROM query;', [], function(rs) {
+            console.log(rs);
+          }, function(error) {
+            console.log('Transaction ERROR: ' + error.message);
+          });
         });
+
     }
 };
-
+var myDB;
 app.initialize();

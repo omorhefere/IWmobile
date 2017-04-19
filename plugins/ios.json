@@ -9,6 +9,9 @@
     "installed_plugins": {
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "uk.ac.shef.dcs.iwmobile"
+        },
+        "cordova-sqlite-storage": {
+            "PACKAGE_NAME": "uk.ac.shef.dcs.iwmobile"
         }
     },
     "dependent_plugins": {}
