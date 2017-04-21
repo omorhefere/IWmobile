@@ -56,11 +56,33 @@ var app = {
             console.log('Populated database OK');
           });
 
-          myDB.executeSql('SELECT * FROM query;', [], function(rs) {
+          myDB.executeSql("PRAGMA table_info([tweet]);", [], function(rs) {
+            // if (rs.rows.length == 0) {
+            //   alert('no table');
+            // } else {
+            //   for (i in rs.rows) {
+            //     console.log(i);
+            //   }
+            // }
             console.log(rs);
           }, function(error) {
             console.log('Transaction ERROR: ' + error.message);
           });
+        });
+
+        $('#ajax').on('click', function(e){
+          e.preventDefault();
+          $.ajax({
+            url: "http://10.0.2.2:3000/api/tweet",
+            dataType: "json",
+            method: "GET",
+          })
+            .done(function(data) {
+              console.log(data);
+            })
+            .fail(function(err){
+              console.error(err);
+            });
         });
 
     }
