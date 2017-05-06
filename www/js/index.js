@@ -33,56 +33,55 @@ var app = {
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         myDB = window.sqlitePlugin.openDatabase({name: "iwmobile.db", location: 'default'});
+        myDB.transaction(function(tx) {
+          tx.executeSql('CREATE TABLE IF NOT EXISTS query (query_id INTERGER(11) PRIMARY KEY UNIQUE NOT NULL ,\
+            query_text VARCHAR(200) NOT NULL,\
+            player_name VARCHAR(100) DEFAULT NULL,\
+            team VARCHAR(100) DEFAULT NULL,\
+            author VARCHAR(20) DEFAULT NULL,\
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)');
+          tx.executeSql('CREATE TABLE IF NOT EXISTS tweet (tweet_id VARCHAR(30) PRIMARY KEY UNIQUE NOT NULL ,\
+            tweet_text TEXT NOT NULL,\
+            username VARCHAR(20) NOT NULL,\
+            created_at DATETIME NOT NULL,\
+            retrieved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\
+            query_id INTERGER(11), \
+            FOREIGN KEY(query_id) REFERENCES query (query_id))');
+        }, function(error) {
+          console.log('Transaction ERROR: ' + error.message);
+        }, function(tx) {
+          console.log('Populated database OK');
+        });
 
         $("#form").on("submit", function(e) {
           e.preventDefault();
-          myDB.transaction(function(tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS query (query_id INTERGER(11) PRIMARY KEY UNIQUE NOT NULL ,\
-              query_text VARCHAR(100) NOT NULL,\
-              player_name VARCHAR(50) DEFAULT NULL,\
-              team VARCHAR(25) DEFAULT NULL,\
-              author VARCHAR(20) DEFAULT NULL,\
-              created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)');
-            tx.executeSql('CREATE TABLE IF NOT EXISTS tweet (tweet_id VARCHAR(30) PRIMARY KEY UNIQUE NOT NULL ,\
-              tweet_text TEXT NOT NULL,\
-              username VARCHAR(20) NOT NULL,\
-              created_at DATETIME NOT NULL,\
-              retrieved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\
-              query_id INTERGER(11), \
-              FOREIGN KEY(query_id) REFERENCES query (query_id))');
-          }, function(error) {
-            console.log('Transaction ERROR: ' + error.message);
-          }, function(tx) {
-            console.log('Populated database OK');
-          });
-
-          myDB.executeSql("PRAGMA table_info([tweet]);", [], function(rs) {
-            // if (rs.rows.length == 0) {
-            //   alert('no table');
-            // } else {
-            //   for (i in rs.rows) {
-            //     console.log(i);
-            //   }
-            // }
-            console.log(rs);
-          }, function(error) {
-            console.log('Transaction ERROR: ' + error.message);
+          $.ajax({
+            url: "http://10.0.2.2:3000/api/search?" + $(this).serialize(),
+            dataType: "json",
+            method: "GET",
+          })
+          .done(function(data) {
+            console.log(data);
+          })
+          .fail(function(err){
+            console.error(err);
           });
         });
 
         $('#ajax').on('click', function(e){
           e.preventDefault();
+
           $.ajax({
             url: "http://10.0.2.2:3000/api/tweet",
             dataType: "json",
             method: "GET",
           })
-            .done(function(data) {
-              console.log(data);
-            })
-            .fail(function(err){
-              console.error(err);
-            });
+          .done(function(data) {
+            console.log(data);
+          })
+          .fail(function(err){
+            console.error(err);
+          });
         });
 
     }
