@@ -56,23 +56,29 @@ var app = {
         $("#form").on("submit", function(e) {
           e.preventDefault();
           $.ajax({
-            url: "http://10.0.2.2:3000/api/search?" + $(this).serialize(),
+            url: "http://192.168.0.49:3000/api/search?" + $(this).serialize(),
             dataType: "json",
             method: "GET",
           })
           .done(function(data) {
-            console.log(data);
+            var tweets = "";
+            data.tweets.forEach(function(tweet, index, array) {
+              var string = "<li>" + tweet.text + "</li>";
+              tweets = tweets + string;
+            });
+            $("#tweetsPage").attr("hidden", null);
+            $("#tweetsResult").append("<ul>" + tweets + "</ul>");
           })
           .fail(function(err){
             console.error(err);
           });
         });
 
-        $('#ajax').on('click', function(e){
+        $('#btnTest').on('click', function(e){
           e.preventDefault();
 
           $.ajax({
-            url: "http://10.0.2.2:3000/api/tweet",
+            url: "http://192.168.0.49:3000/api/tweet",
             dataType: "json",
             method: "GET",
           })
