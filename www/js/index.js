@@ -56,6 +56,7 @@ var app = {
         // efe's ip 127.0.0.1
         $("#form").on("submit", function(e) {
           e.preventDefault();
+
           if ($("#checkDatabase").prop("checked") === true) {
             $.ajax({
               url: "http://192.168.0.49:3000/api/search?" + $(this).serialize(),
@@ -95,7 +96,6 @@ var app = {
               }, function(tx) {
                 console.log('Added' + data.tweets.length + 'tweets to local database');
               });
-
             })
             .fail(function(err){
               console.error(err);
@@ -132,7 +132,7 @@ var app = {
         $('#btnTest').on('click', function(e) {
           e.preventDefault();
           $.ajax({
-            url: "http://192.168.0.49:3000/api/tweet",
+            url: "http://127.0.0.1:3000/api/tweet",
             dataType: "json",
             method: "GET",
           })
