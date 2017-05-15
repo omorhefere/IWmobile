@@ -52,7 +52,7 @@ var app = {
         }, function(tx) {
           console.log('Populated database OK');
         });
-
+        // efe's ip 127.0.0.1
         $("#form").on("submit", function(e) {
           e.preventDefault();
           $.ajax({
