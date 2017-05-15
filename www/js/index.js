@@ -56,7 +56,7 @@ var app = {
         $("#form").on("submit", function(e) {
           e.preventDefault();
           $.ajax({
-            url: "http://192.168.0.49:3000/api/search?" + $(this).serialize(),
+            url: "http://127.0.0.1:3000/api/search?" + $(this).serialize(),
             dataType: "json",
             method: "GET",
           })
@@ -98,7 +98,7 @@ var app = {
           e.preventDefault();
 
           $.ajax({
-            url: "http://192.168.0.49:3000/api/tweet",
+            url: "http://127.0.0.1:3000/api/tweet",
             dataType: "json",
             method: "GET",
           })
