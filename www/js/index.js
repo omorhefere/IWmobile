@@ -61,20 +61,40 @@ var app = {
             method: "GET",
           })
           .done(function(data) {
+            // Display tweets
             var tweets = "";
+            var tweetsArray = [];
+            var query_id = data.query_id;
             data.tweets.forEach(function(tweet, index, array) {
               var string = "<li>" + tweet.text + "</li>";
               tweets = tweets + string;
+
+              var tweet_id = tweet.id_str; // tweet id
+              var tweet_text = tweet.text // tweet text
+              var username = tweet.user.screen_name // screen name of user who tweeted it
+              var created_at = new Date(tweet.created_at) // when user tweeted it
+              // var tweetArray = [tweet_id, tweet_text, username, created_at, query_id];
+              tweetsArray.push(tweet_id, tweet_text, username, created_at, retrieved_at, query_id);
             });
+            console.log(tweetsArray);
             $("#tweetsPanel").attr("hidden", null);
             $("#tweetsResult").append("<ul>" + tweets + "</ul>");
+            // Save tweets to local DB
+            myDB.transaction(function(tx) {
+              tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES (?,?,?,?,?)", tweetsArray);
+            }, function(error) {
+              console.log('Transaction ERROR: ' + error.message);
+            }, function(tx) {
+              console.log('Added' + tweetsArray.length + 'tweets to local database');
+            });
+
           })
           .fail(function(err){
             console.error(err);
           });
         });
 
-        $('#btnTest').on('click', function(e){
+        $('#btnTest').on('click', function(e) {
           e.preventDefault();
 
           $.ajax({
@@ -91,6 +111,21 @@ var app = {
           });
         });
 
+      $("#btnDrop").on("click", function(e) {
+        e.preventDefault();
+
+        var text = confirm("This will delete the \"query\" and  \"tweet\"  tables, are you sure ?");
+        if (text === true) {
+          myDB.transaction(function(tx) {
+            tx.executeSql("DROP TABLE IF EXISTS query");
+            tx.executeSql("DROP TABLE IF EXISTS tweet");
+          }, function(error) {
+            console.log('Transaction ERROR: ' + error.message);
+          }, function(tx) {
+            console.log('Successfully drop "query" and "tweet" tables');
+          });
+        }
+      });
     }
 };
 var myDB;
