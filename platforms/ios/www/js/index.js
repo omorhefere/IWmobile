@@ -59,7 +59,11 @@ var app = {
 
           if ($("#checkDatabase").prop("checked") === true) {
             $.ajax({
+<<<<<<< HEAD
               url: "http://143.167.197.168:3000/api/search?" + $(this).serialize(),
+=======
+              url: "http://143.167.147.214:3000/api/search?" + $(this).serialize(),
+>>>>>>> 4d3c11f2616658de8f4a9384cc68fa9fc010b7c5
               dataType: "json",
               method: "GET",
             })
@@ -78,14 +82,22 @@ var app = {
                 var username = tweet.user.screen_name // screen name of user who tweeted it
                 var created_at = new Date(tweet.created_at) // when user tweeted it
                 // var tweetArray = [tweet_id, tweet_text, username, created_at, query_id];
-                tweetsArray.push(tweet_id, tweet_text, username, created_at, query_id);
+                //tweetsArray.push(tweet_id, tweet_text, username, created_at, query_id);
                 if (index < data.tweets.length - 1) {
                   binding += ",(?,?,?,?,?)";
                 }
               });
+              tweetsArray = data.tweets;
               console.log(tweetsArray);
               $("#tweetsPanel").attr("hidden", null);
-              $("#tweetsResult").append("<ul>" + tweets + "</ul>");
+              for (t = 0 ; t < tweetsArray.length ; t++){
+                var created_at = tweetsArray[t].created_at ;
+                //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
+                $("#tweetsResult").append('<div class="col-md-12 tweet-container"><div class="panel panel-success"><div class="panel-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
+                $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="panel-body tweet-link-div">' + tweetsArray[t].text + '</div></a>');
+                $("#tweetsResult").append('<div class="panel-success panel-footer"><p> Time and date: ' + created_at + ' </p></div>');
+              }
+
               // Save tweets to local DB
               // var test = [data.tweets[0].id_str, data.tweets[0].text, data.tweets[0].user.screen_name, new Date(data.tweets[0].created_at), query_id];
               // console.log(test);
@@ -132,7 +144,11 @@ var app = {
         $('#btnTest').on('click', function(e) {
           e.preventDefault();
           $.ajax({
+<<<<<<< HEAD
             url: "http://143.167.197.168:3000/api/tweet",
+=======
+            url: "http://143.167.147.214:3000/api/tweet",
+>>>>>>> 4d3c11f2616658de8f4a9384cc68fa9fc010b7c5
             dataType: "json",
             method: "GET",
           })
