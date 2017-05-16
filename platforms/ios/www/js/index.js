@@ -89,9 +89,9 @@ var app = {
               for (t = 0 ; t < tweetsArray.length ; t++){
                 var created_at = tweetsArray[t].created_at ;
                 //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
-                $("#tweetsResult").append('<div class="col-md-12 tweet-container"><div class="panel panel-success"><div class="panel-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
-                $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="panel-body tweet-link-div">' + tweetsArray[t].text + '</div></a>');
-                $("#tweetsResult").append('<div class="panel-success panel-footer"><p> Time and date: ' + created_at + ' </p></div>');
+                $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
+                $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
+                $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
               }
 
               // Save tweets to local DB
@@ -152,6 +152,8 @@ var app = {
             console.error(err);
           });
         });
+
+        
 
       $("#btnDrop").on("click", function(e) {
         e.preventDefault();
