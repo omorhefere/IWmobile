@@ -59,7 +59,7 @@ var app = {
 
           if ($("#checkDatabase").prop("checked") === true) {
             $.ajax({
-              url: "http://192.168.0.49:3000/api/search?" + $(this).serialize(),
+              url: "http://143.167.147.64:3000/api/search?" + $(this).serialize(),
               dataType: "json",
               method: "GET",
             })
@@ -132,7 +132,7 @@ var app = {
         $('#btnTest').on('click', function(e) {
           e.preventDefault();
           $.ajax({
-            url: "http://127.0.0.1:3000/api/tweet",
+            url: "http://143.167.147.64:3000/api/tweet",
             dataType: "json",
             method: "GET",
           })
