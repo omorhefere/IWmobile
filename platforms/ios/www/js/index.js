@@ -53,13 +53,13 @@ var app = {
         }, function(tx) {
           console.log('Populated database OK');
         });
-        // efe's ip 127.0.0.1
+        // efe's ip 143.167.197.168
         $("#form").on("submit", function(e) {
           e.preventDefault();
-          //maheshas ip http://143.167.147.64
+
           if ($("#checkDatabase").prop("checked") === true) {
             $.ajax({
-              url: "http://143.167.147.64:3000/api/search?" + $(this).serialize(),
+              url: "http://143.167.197.168:3000/api/search?" + $(this).serialize(),
               dataType: "json",
               method: "GET",
             })
@@ -132,7 +132,7 @@ var app = {
         $('#btnTest').on('click', function(e) {
           e.preventDefault();
           $.ajax({
-            url: "http://143.167.147.64:3000/api/tweet",
+            url: "http://143.167.197.168:3000/api/tweet",
             dataType: "json",
             method: "GET",
           })
