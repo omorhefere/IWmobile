@@ -17,30 +17,30 @@
  * under the License.
  */
 var app = {
-    // Application Constructor
-    initialize: function() {
-        document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
-    },
+  // Application Constructor
+  initialize: function() {
+    document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+  },
 
-    // deviceready Event Handler
-    //
-    // Bind any cordova events here. Common events are:
-    // 'pause', 'resume', etc.
-    onDeviceReady: function() {
-        this.receivedEvent('deviceready');
-    },
+  // deviceready Event Handler
+  //
+  // Bind any cordova events here. Common events are:
+  // 'pause', 'resume', etc.
+  onDeviceReady: function() {
+    this.receivedEvent('deviceready');
+  },
 
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        myDB = window.sqlitePlugin.openDatabase({name: "iwmobile.db", location: 'default'});
-        myDB.transaction(function(tx) {
-          tx.executeSql('CREATE TABLE IF NOT EXISTS query (query_id INTEGER PRIMARY KEY UNIQUE NOT NULL ,\
+  // Update DOM on a Received Event
+  receivedEvent: function(id) {
+    myDB = window.sqlitePlugin.openDatabase({name: "iwmobile.db", location: 'default'});
+    myDB.transaction(function(tx) {
+      tx.executeSql('CREATE TABLE IF NOT EXISTS query (query_id INTEGER PRIMARY KEY UNIQUE NOT NULL ,\
             query_text TEXT NOT NULL,\
             player_name TEXT DEFAULT NULL,\
             team TEXT DEFAULT NULL,\
             author TEXT DEFAULT NULL,\
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)');
-          tx.executeSql('CREATE TABLE IF NOT EXISTS tweet (id INTEGER PRIMARY KEY AUTOINCREMENT,\
+      tx.executeSql('CREATE TABLE IF NOT EXISTS tweet (id INTEGER PRIMARY KEY AUTOINCREMENT,\
             tweet_id TEXT NOT NULL,\
             tweet_text TEXT NOT NULL,\
             username TEXT NOT NULL,\
@@ -48,45 +48,52 @@ var app = {
             retrieved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\
             query_id INTEGER,\
             FOREIGN KEY(query_id) REFERENCES query (query_id))');
-        }, function(error) {
-          console.log('Transaction ERROR: ' + error.message);
-        }, function(tx) {
-          console.log('Populated database OK');
-        });
-        // efe's ip 127.0.0.1
-        $("#form").on("submit", function(e) {
-          e.preventDefault();
-          //maheshas ip http://143.167.147.64
-          if ($("#checkDatabase").prop("checked") === true) {
-            $.ajax({
-              url: "http://192.168.0.100:3000/api/search?" + $(this).serialize(),
-              dataType: "json",
-              method: "GET",
-            })
-            .done(function(data) {
-              // Display tweets
-              var tweets = "";
-              var tweetsArray = [];
-              var query_id = data.query_id;
-              var binding = "(?,?,?,?,?)";
-              data.tweets.forEach(function(tweet, index, array) {
-                var string = "<li>" + tweet.text + "</li>";
-                tweets = tweets + string;
+    }, function(error) {
+      console.log('Transaction ERROR: ' + error.message);
+    }, function(tx) {
+      console.log('Populated database OK');
+    });
 
-                var tweet_id = tweet.id_str; // tweet id
-                var tweet_text = tweet.text // tweet text
-                var username = tweet.user.screen_name // screen name of user who tweeted it
-                var created_at = new Date(tweet.created_at) // when user tweeted it
-                // var tweetArray = [tweet_id, tweet_text, username, created_at, query_id];
-                //tweetsArray.push(tweet_id, tweet_text, username, created_at, query_id);
-                if (index < data.tweets.length - 1) {
-                  binding += ",(?,?,?,?,?)";
-                }
-              });
-              tweetsArray = data.tweets;
-              console.log(tweetsArray);
-              $("#tweetsPanel").attr("hidden", null);
+    $("#form").on("submit", function(e) {
+      e.preventDefault();
+      var queryOption;
 
+      if ($("#checkDatabase").prop("checked") === true) {
+        $.ajax({
+          url: "http://143.167.145.118:3000/api/search?" + $(this).serialize(),
+          data: {
+            player: $('#playerName').val(),
+            queryOption: $('input[id=queryOption]:checked').val(),
+            team: $('#teamName').val(),
+            author: $('#authorName').val()
+          },
+          method: "POST",
+          dataType: 'json',
+
+          success: function(data) {
+            // Display tweets
+            var tweets = "";
+            var tweetsArray = [];
+            var query_id = data.query_id;
+            var binding = "(?,?,?,?,?)";
+            data.tweets.forEach(function(tweet, index, array) {
+              var string = "<li>" + tweet.text + "</li>";
+              tweets = tweets + string;
+
+              var tweet_id = tweet.id_str; // tweet id
+              var tweet_text = tweet.text // tweet text
+              var username = tweet.user.screen_name // screen name of user who tweeted it
+              var created_at = new Date(tweet.created_at) // when user tweeted it
+              // var tweetArray = [tweet_id, tweet_text, username, created_at, query_id];
+              //tweetsArray.push(tweet_id, tweet_text, username, created_at, query_id);
+              if (index < data.tweets.length - 1) {
+                binding += ",(?,?,?,?,?)";
+              }
+            });
+            console.log(tweetsArray);
+            tweetsArray = data.tweets;
+            console.log(tweetsArray);
+            $("#tweetsPanel").attr("hidden", null);
               for (t = 0 ; t < tweetsArray.length ; t++){
                 var created_at = tweetsArray[t].created_at ;
                 //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
@@ -94,84 +101,79 @@ var app = {
                 $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
                 $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
               }
-
-              // Save tweets to local DB
-              // var test = [data.tweets[0].id_str, data.tweets[0].text, data.tweets[0].user.screen_name, new Date(data.tweets[0].created_at), query_id];
-              // console.log(test);
-              myDB.transaction(function(tx) {
-                tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + binding + ";", tweetsArray);
-              }, function(error) {
-                console.log('Transaction ERROR: ' + error.message);
-              }, function(tx) {
-                console.log('Added' + data.tweets.length + 'tweets to local database');
-              });
-            })
-            .fail(function(err){
-              console.error(err);
-            });
-          } else {
-            // myDB.transaction(function(tx) {
-            //   tx.executeSql("SELECT * FROM tweet;", []);
-            // }, function(error) {
-            //   console.log('Transaction ERROR: ' + error.message);
-            // }, function(rs) {
-            //   console.log(rs.rows.item(0));
-            //   var tweets = "";
-            //   // tweets.forEach(function(tweet, index, array) {
-            //   //   var string = "<li>" + tweet.tweet_text + "</li>";
-            //   //   tweets = tweets + string;
-            //   // });
-            //   // $("#tweetsPanel").attr("hidden", true);
-            //   // $("#localTweetsPanel").attr("hidden", null);
-            //   // $("#localTweetsResult").append("<ul>" + tweets + "</ul>");
-            // });
-
+            //$("#tweetsPanel").attr("hidden", null);
+            //$("#tweetsResult").append("<ul>" + tweets + "</ul>");
+            // Save tweets to local DB
+            // var test = [data.tweets[0].id_str, data.tweets[0].text, data.tweets[0].user.screen_name, new Date(data.tweets[0].created_at), query_id];
+            // console.log(test);
             myDB.transaction(function(tx) {
-              tx.executeSql('SELECT * FROM tweet LIMIT 100', [], function(tx, rs) {
-                for (var i = 0; i < rs.rows.length; i++) {
-                  console.log(rs.rows.item(i).tweet_text);
-                }
-              }, function(tx, error) {
-                console.log('SELECT error: ' + error.message);
-              });
+              tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + binding + ";", tweetsArray);
+            }, function(error) {
+              console.log('Transaction ERROR: ' + error.message);
+            }, function(tx) {
+              console.log('Added' + data.tweets.length + 'tweets to local database');
             });
-          }
-        });
 
-        $('#btnTest').on('click', function(e) {
-          e.preventDefault();
-          $.ajax({
-            url: "http://192.168.0.100:3000/api/tweet",
-            dataType: "json",
-            method: "GET",
-          })
-          .done(function(data) {
-            alert(data.message);
-            console.log(data);
-          })
-          .fail(function(err){
+          },
+          fail: function(err) {
             console.error(err);
+          }
+        })
+      } else {
+        // myDB.transaction(function(tx) {
+        //   tx.executeSql("SELECT * FROM tweet;", []);
+        // }, function(error) {
+        //   console.log('Transaction ERROR: ' + error.message);
+        // }, function(rs) {
+        //   console.log(rs.rows.item(0));
+        //   var tweets = "";
+        //   // tweets.forEach(function(tweet, index, array) {
+        //   //   var string = "<li>" + tweet.tweet_text + "</li>";
+        //   //   tweets = tweets + string;
+        //   // });
+        //   // $("#tweetsPanel").attr("hidden", true);
+        //   // $("#localTweetsPanel").attr("hidden", null);
+        //   // $("#localTweetsResult").append("<ul>" + tweets + "</ul>");
+        // });
+
+        myDB.transaction(function(tx) {
+          tx.executeSql('SELECT * FROM tweet LIMIT 100', [], function(tx, rs) {
+            for (var i = 0; i < rs.rows.length; i++) {
+              console.log(rs.rows.item(i).tweet_text);
+            }
+          }, function(tx, error) {
+            console.log('SELECT error: ' + error.message);
           });
         });
+      }
+    });
 
-
-
-      $("#btnDrop").on("click", function(e) {
-        e.preventDefault();
-
-        var text = confirm("This will delete the \"query\" and  \"tweet\"  tables, are you sure ?");
-        if (text === true) {
-          myDB.transaction(function(tx) {
-            tx.executeSql("DROP TABLE IF EXISTS query");
-            tx.executeSql("DROP TABLE IF EXISTS tweet");
-          }, function(error) {
-            console.log('Transaction ERROR: ' + error.message);
-          }, function(tx) {
-            console.log('Successfully drop "query" and "tweet" tables');
-          });
-        }
+    $('#btnTest').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({url: "http://143.167.145.118:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
+        alert(data.message);
+        console.log(data);
+      }).fail(function(err) {
+        console.error(err);
       });
-    }
+    });
+
+    $("#btnDrop").on("click", function(e) {
+      e.preventDefault();
+
+      var text = confirm("This will delete the \"query\" and  \"tweet\"  tables, are you sure ?");
+      if (text === true) {
+        myDB.transaction(function(tx) {
+          tx.executeSql("DROP TABLE IF EXISTS query");
+          tx.executeSql("DROP TABLE IF EXISTS tweet");
+        }, function(error) {
+          console.log('Transaction ERROR: ' + error.message);
+        }, function(tx) {
+          console.log('Successfully drop "query" and "tweet" tables');
+        });
+      }
+    });
+  }
 };
 var myDB;
 app.initialize();
