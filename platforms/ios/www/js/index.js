@@ -86,6 +86,7 @@ var app = {
               tweetsArray = data.tweets;
               console.log(tweetsArray);
               $("#tweetsPanel").attr("hidden", null);
+
               for (t = 0 ; t < tweetsArray.length ; t++){
                 var created_at = tweetsArray[t].created_at ;
                 //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");

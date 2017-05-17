@@ -212,7 +212,7 @@
 				LastUpgradeCheck = 510;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
-						DevelopmentTeam = Q8B25S6R66;
+						DevelopmentTeam = 63QH9YYCZ5;
 					};
 				};
 			};
@@ -313,7 +313,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
-				DEVELOPMENT_TEAM = Q8B25S6R66;
+				DEVELOPMENT_TEAM = 63QH9YYCZ5;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -323,7 +323,7 @@
 				INFOPLIST_FILE = "IWmobile/IWmobile-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = footballtweets;
+				PRODUCT_BUNDLE_IDENTIFIER = footballtweetsw;
 				PRODUCT_NAME = IWmobile;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -339,7 +339,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
-				DEVELOPMENT_TEAM = Q8B25S6R66;
+				DEVELOPMENT_TEAM = 63QH9YYCZ5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IWmobile/IWmobile-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
@@ -347,7 +347,7 @@
 				INFOPLIST_FILE = "IWmobile/IWmobile-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = footballtweets;
+				PRODUCT_BUNDLE_IDENTIFIER = footballtweetsw;
 				PRODUCT_NAME = IWmobile;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
