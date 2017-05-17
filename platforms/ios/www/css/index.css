@@ -185,7 +185,7 @@ h1, h2 {
 }
 
 .top-section{
-  
+
 }
 
 /*HEADING */
@@ -222,8 +222,8 @@ h1, h2 {
   color: white;
 }
 
-.form-control {
-
+.and-button {
+  paddding-right: !important;
 }
 
 /*# sourceMappingURL=style.css.map */
