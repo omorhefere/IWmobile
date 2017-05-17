@@ -59,7 +59,7 @@ var app = {
           //maheshas ip http://143.167.147.64
           if ($("#checkDatabase").prop("checked") === true) {
             $.ajax({
-              url: "http://143.167.147.214:3000/api/search?" + $(this).serialize(),
+              url: "http://192.168.0.100:3000/api/search?" + $(this).serialize(),
               dataType: "json",
               method: "GET",
             })
@@ -140,7 +140,7 @@ var app = {
         $('#btnTest').on('click', function(e) {
           e.preventDefault();
           $.ajax({
-            url: "http://143.167.147.214:3000/api/tweet",
+            url: "http://192.168.0.100:3000/api/tweet",
             dataType: "json",
             method: "GET",
           })
@@ -153,7 +153,7 @@ var app = {
           });
         });
 
-        
+
 
       $("#btnDrop").on("click", function(e) {
         e.preventDefault();
