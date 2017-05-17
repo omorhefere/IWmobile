@@ -53,10 +53,10 @@ var app = {
         }, function(tx) {
           console.log('Populated database OK');
         });
-        // efe's ip 127.0.0.1
+        // efe's ip 143.167.197.168
         $("#form").on("submit", function(e) {
           e.preventDefault();
-          //maheshas ip http://143.167.147.64
+
           if ($("#checkDatabase").prop("checked") === true) {
             $.ajax({
               url: "http://192.168.0.100:3000/api/search?" + $(this).serialize(),
@@ -78,23 +78,14 @@ var app = {
                 var username = tweet.user.screen_name // screen name of user who tweeted it
                 var created_at = new Date(tweet.created_at) // when user tweeted it
                 // var tweetArray = [tweet_id, tweet_text, username, created_at, query_id];
-                //tweetsArray.push(tweet_id, tweet_text, username, created_at, query_id);
+                tweetsArray.push(tweet_id, tweet_text, username, created_at, query_id);
                 if (index < data.tweets.length - 1) {
                   binding += ",(?,?,?,?,?)";
                 }
               });
-              tweetsArray = data.tweets;
               console.log(tweetsArray);
               $("#tweetsPanel").attr("hidden", null);
-
-              for (t = 0 ; t < tweetsArray.length ; t++){
-                var created_at = tweetsArray[t].created_at ;
-                //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
-                $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
-                $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
-                $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
-              }
-
+              $("#tweetsResult").append("<ul>" + tweets + "</ul>");
               // Save tweets to local DB
               // var test = [data.tweets[0].id_str, data.tweets[0].text, data.tweets[0].user.screen_name, new Date(data.tweets[0].created_at), query_id];
               // console.log(test);
@@ -153,8 +144,6 @@ var app = {
             console.error(err);
           });
         });
-
-
 
       $("#btnDrop").on("click", function(e) {
         e.preventDefault();
