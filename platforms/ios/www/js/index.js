@@ -56,18 +56,14 @@ var app = {
 
     $("#form").on("submit", function(e) {
       e.preventDefault();
-      var queryOption
-      if ($('#AND').val() === undefined) {
-        queryOption = $('#OR').val()
-      } else {
-        queryOption = $('#AND').val()
-      }
+      var queryOption;
+
       if ($("#checkDatabase").prop("checked") === true) {
         $.ajax({
           url: "http://143.167.199.71:3000/api/search?" + $(this).serialize(),
           data: {
             player: $('#playerName').val(),
-            queryOption: queryOption,
+            queryOption: $('input[id=queryOption]:checked').val(),
             team: $('#teamName').val(),
             author: $('#authorName').val()
           },
