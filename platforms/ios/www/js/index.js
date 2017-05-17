@@ -91,9 +91,10 @@ var app = {
               }
             });
             console.log(tweetsArray);
+
             tweetsArray = data.tweets;
-            console.log(tweetsArray);
-            $("#tweetsPanel").attr("hidden", null);
+              console.log(tweetsArray);
+              $("#tweetsPanel").attr("hidden", null);
               for (t = 0 ; t < tweetsArray.length ; t++){
                 var created_at = tweetsArray[t].created_at ;
                 //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
@@ -101,6 +102,7 @@ var app = {
                 $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
                 $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
               }
+
             //$("#tweetsPanel").attr("hidden", null);
             //$("#tweetsResult").append("<ul>" + tweets + "</ul>");
             // Save tweets to local DB
