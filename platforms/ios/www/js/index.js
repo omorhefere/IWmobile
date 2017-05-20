@@ -58,7 +58,6 @@ var app = {
       e.preventDefault();
       var queryOption;
 
-      if ($("#checkDatabase").prop("checked") === true) {
         $.ajax({
           url: "http://143.167.146.242:3000/api/search?" + $(this).serialize(),
           data: {
@@ -90,10 +89,8 @@ var app = {
                 binding += ",(?,?,?,?,?)";
               }
             });
-            console.log(tweetsArray);
 
             tweetsArray = data.tweets;
-              console.log(tweetsArray);
               $("#tweetsPanel").attr("hidden", null);
               var old_html = $("#tweetsResult").html();
               document.getElementById('tweetsResult').innerHTML = '';
@@ -102,6 +99,16 @@ var app = {
                 //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
                 $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
                 $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
+                $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
+              }
+
+            dbTweetsArray = data.dbTweets;
+            console.log(dbTweetsArray[0])
+              for (t = 0 ; t < dbTweetsArray.length ; t++){
+                var created_at = dbTweetsArray[t].created_at ;
+                //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
+                $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + dbTweetsArray[t].username + '" target="_blank">@' + dbTweetsArray[t].username + '</a></div></div></div>');
+                $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + dbTweetsArray[t].username + '/status/' + dbTweetsArray[t].tweet_id + '" target="_blank"><div class="tweet-link-div">' + dbTweetsArray[t].tweet_text + '</div></a>');
                 $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
               }
 
@@ -123,33 +130,6 @@ var app = {
             console.error(err);
           }
         })
-      } else {
-        // myDB.transaction(function(tx) {
-        //   tx.executeSql("SELECT * FROM tweet;", []);
-        // }, function(error) {
-        //   console.log('Transaction ERROR: ' + error.message);
-        // }, function(rs) {
-        //   console.log(rs.rows.item(0));
-        //   var tweets = "";
-        //   // tweets.forEach(function(tweet, index, array) {
-        //   //   var string = "<li>" + tweet.tweet_text + "</li>";
-        //   //   tweets = tweets + string;
-        //   // });
-        //   // $("#tweetsPanel").attr("hidden", true);
-        //   // $("#localTweetsPanel").attr("hidden", null);
-        //   // $("#localTweetsResult").append("<ul>" + tweets + "</ul>");
-        // });
-
-        myDB.transaction(function(tx) {
-          tx.executeSql('SELECT * FROM tweet LIMIT 100', [], function(tx, rs) {
-            for (var i = 0; i < rs.rows.length; i++) {
-              console.log(rs.rows.item(i).tweet_text);
-            }
-          }, function(tx, error) {
-            console.log('SELECT error: ' + error.message);
-          });
-        });
-      }
     });
 
     $('#btnTest').on('click', function(e) {
