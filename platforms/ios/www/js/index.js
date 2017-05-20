@@ -60,7 +60,7 @@ var app = {
 
       if ($("#checkDatabase").prop("checked") === true) {
         $.ajax({
-          url: "http://143.167.145.118:3000/api/search?" + $(this).serialize(),
+          url: "http://143.167.146.242:3000/api/search?" + $(this).serialize(),
           data: {
             player: $('#playerName').val(),
             queryOption: $('input[id=queryOption]:checked').val(),
@@ -95,6 +95,8 @@ var app = {
             tweetsArray = data.tweets;
               console.log(tweetsArray);
               $("#tweetsPanel").attr("hidden", null);
+              var old_html = $("#tweetsResult").html();
+              document.getElementById('tweetsResult').innerHTML = '';
               for (t = 0 ; t < tweetsArray.length ; t++){
                 var created_at = tweetsArray[t].created_at ;
                 //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
@@ -152,7 +154,7 @@ var app = {
 
     $('#btnTest').on('click', function(e) {
       e.preventDefault();
-      $.ajax({url: "http://143.167.145.118:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
+      $.ajax({url: "http://143.167.146.242:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
         alert(data.message);
         console.log(data);
       }).fail(function(err) {
