@@ -110,27 +110,12 @@ var app = {
                 $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + dbTweetsArray[t].username + '/status/' + dbTweetsArray[t].tweet_id + '" target="_blank"><div class="tweet-link-div">' + dbTweetsArray[t].tweet_text + '</div></a>');
                 $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
               }
-            if (data.DBpediaInfo !== undefined){
-              console.log(data.DBpediaInfo + "Got info")
-              $("#dbtab").attr("hidden", null);
-              var old_html = $("#dbinfo").html();
-              document.getElementById('dbinfo').innerHTML = '';
-              $("#dbinfo").append('<div class="col-xs-12"><h1 class="db-heading">' + data.DBpediaInfo.playerInfo[0].name + ' </h1><p> ' + data.DBpediaInfo.playerInfo[1].dob + ' <p><h3> ' + data.DBpediaInfo.playerInfo[2].team + '</h3><h4> ' + data.DBpediaInfo.playerInfo[3].position + '</h4></div>');
-              console.log("passed append bit")
-
-            }
-            else{
-              $("#dbtab").attr("hidden", true);
-              var old_html = $("#dbinfo").html();
-              document.getElementById('dbinfo').innerHTML = '';
-            }
+              //Show the graph
+              showGraph(data);
+              //Show the dbPedia info
+              showDBPInfo(data);
 
 
-            //$("#tweetsPanel").attr("hidden", null);
-            //$("#tweetsResult").append("<ul>" + tweets + "</ul>");
-            // Save tweets to local DB
-            // var test = [data.tweets[0].id_str, data.tweets[0].text, data.tweets[0].user.screen_name, new Date(data.tweets[0].created_at), query_id];
-            // console.log(test);
             myDB.transaction(function(tx) {
               tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + binding + ";", tweetsArray);
             }, function(error) {
@@ -146,6 +131,51 @@ var app = {
         })
     });
 
+    function showDBPInfo(data){
+      if (data.DBpediaInfo !== undefined){
+        $("#dbtab").attr("hidden", null);
+        var old_html = $("#dbinfo").html();
+        document.getElementById('dbinfo').innerHTML = '';
+        $("#dbinfo").append('<div class="col-xs-12"><h1 class="db-heading">' + data.DBpediaInfo.playerInfo[0].name + ' </h1><p> ' + data.DBpediaInfo.playerInfo[1].dob + ' <p><h3> ' + data.DBpediaInfo.playerInfo[2].team + '</h3><h4> ' + data.DBpediaInfo.playerInfo[3].position + '</h4></div>');
+        console.log("passed append bit")
+
+      }
+      else{
+        $("#dbtab").attr("hidden", true);
+        var old_html = $("#dbinfo").html();
+        document.getElementById('dbinfo').innerHTML = '';
+      }
+
+    }
+
+    function showGraph(data){
+      $("#graphtab").attr("hidden", null);
+      var dates = []
+      var freqs = []
+
+
+      for (group = 0 ; group < data.classifiedTweets.length ; group++) {
+        var date = new Date(data.classifiedTweets[group][0].created_at).toDateString();
+        var freq = data.classifiedTweets[group].length
+        dates.push(date);
+        freqs.push(freq);
+      }
+      var ctx = document.getElementById('freqGraph').getContext('2d');
+      var freqGraph = new Chart(ctx, {
+        type: 'line',
+        responsive: true,
+        data: {
+          labels: dates.reverse(),
+          datasets: [{
+            label: 'Number of Tweets',
+            data: freqs,
+            backgroundColor: "rgba(153,255,51,0.4)"
+          }]
+        }
+      });
+    }
+
+    /////////REMOVE THESE
     $('#btnTest').on('click', function(e) {
       e.preventDefault();
       $.ajax({url: "http://143.167.146.214:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
