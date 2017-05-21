@@ -77,21 +77,10 @@ var app = {
           query = query + ' from:' + author; // add author to query
       }
 
-      // myDB.transaction(function(tx) {
-      //   var binding = ['6', query, player, team, author];
-      //   tx.executeSql("INSERT OR IGNORE INTO query(query_id, query_text, player_name, team, author) VALUES (?, ?, ?, ?, ?)", binding, function(tx, rs) {
-      //     console.log('Added ' + query + ' to database');
-      //   }, function(tx, error) {
-      //     console.log(error);
-      //   });
-      // });
-
       // Find the number of local tweets from the given query
       myDB.transaction(function(tx) {
         var temp = {query_id: 0};
         tx.executeSql("SELECT * FROM query WHERE query_text = '" + query + "'", [], function(tx, rs) {
-          console.log(temp);
-          console.log(rs.rows);
           if (rs.rows.length !== 0) {
             temp = rs.rows.item(0);
           }
@@ -113,48 +102,85 @@ var app = {
                 dataType: 'json',
 
                 success: function(data) {
-                  console.log(data);
-                  // // Save or update query in local DB
-                  var query_id = data.query_id;
-                  if (rs.rows.length === 0) { // new query = save to local DB
-                    myDB.transaction(function(tx) {
-                      var i = [data.query_id, query, player, team, author];
-                      tx.executeSql("INSERT INTO query (query_id, query_text, player_name, team, author) VALUES (?, ?, ?, ?, ?);", i);
-                    }, function(error) {
-                      console.log('Transaction ERROR: ' + error.message);
-                    }, function(tx) {
-                      console.log('Added <' + query + '> to local database');
-                    });
-                  } else { // query already existed = update created_at value
-                    myDB.transaction(function(tx) {
-                      tx.executeSql("UPDATE query SET created_at = date('now') WHERE query_id = " + query_id + ";");
-                    }, function(error) {
-                      console.log('Transaction ERROR: ' + error.message);
-                    }, function(tx) {
-                      console.log('Updated <' + query + '>');
-                    });
-                  }
+                  if (data.isFound === true) {
+                    console.log(data);
+                    // // Save or update query in local DB
+                    var query_id = data.query_id;
+                    if (rs.rows.length === 0) { // new query = save to local DB
+                      myDB.transaction(function(tx) {
+                        var i = [data.query_id, query, player, team, author];
+                        tx.executeSql("INSERT INTO query (query_id, query_text, player_name, team, author) VALUES (?, ?, ?, ?, ?);", i);
+                      }, function(error) {
+                        console.log('Transaction ERROR: ' + error.message);
+                      }, function(tx) {
+                        console.log('Added <' + query + '> to local database');
+                      });
+                    } else { // query already existed = update created_at value
+                      myDB.transaction(function(tx) {
+                        tx.executeSql("UPDATE query SET created_at = date('now') WHERE query_id = " + query_id + ";");
+                      }, function(error) {
+                        console.log('Transaction ERROR: ' + error.message);
+                      }, function(tx) {
+                        console.log('Updated <' + query + '>');
+                      });
+                    }
 
-                  // Save tweets to local DB
-                  if (data.tweets.length !== 0) {
-                    myDB.transaction(function(tx) {
-                      var tArray = [];
-                      var binding = "(?,?,?,?,?)";
-                      data.tweets.forEach(function(tweet, index, array) {
-                        var tweet_id = tweet.id_str; // tweet id
-                        var tweet_text = tweet.text // tweet text
-                        var username = tweet.user.screen_name // screen name of user who tweeted it
-                        var created_at = new Date(tweet.created_at) // when user tweeted it
-                        tArray.push(tweet_id, tweet_text, username, created_at, query_id);
-                        if (index < data.tweets.length - 1) {
-                          binding += ",(?,?,?,?,?)";
+                    // Save tweets to local DB
+                    if (data.tweets.length !== 0) {
+                      myDB.transaction(function(tx) {
+                        var tArray = [];
+                        var binding = "(?,?,?,?,?)";
+                        data.tweets.forEach(function(tweet, index, array) {
+                          var tweet_id = tweet.id_str; // tweet id
+                          var tweet_text = tweet.text // tweet text
+                          var username = tweet.user.screen_name // screen name of user who tweeted it
+                          var created_at = new Date(tweet.created_at) // when user tweeted it
+                          tArray.push(tweet_id, tweet_text, username, created_at, query_id);
+                          if (index < data.tweets.length - 1) {
+                            binding += ",(?,?,?,?,?)";
+                          }
+                        });
+                        tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + binding + ";", tArray);
+                      }, function(error) {
+                        console.log('Transaction ERROR: ' + error.message);
+                      }, function(tx) {
+                        console.log('Added ' + data.tweets.length + ' tweets to local database');
+                        // add remoteTweets to local DB
+                        if (data.remoteTweets.length !== 0) {
+                          myDB.transaction(function(tx) {
+                            var rBinding = "";
+                            var rArray = [];
+                            data.remoteTweets.forEach(function(tweet, index, array) {
+                              rBinding += "(?,?,?,?,?)";
+                              var tweet_id = tweet.tweet_id; // tweet id
+                              var tweet_text = tweet.tweet_text // tweet text
+                              var username = tweet.username // screen name of user who tweeted it
+                              var created_at = new Date(tweet.created_at) // when user tweeted it
+                              rArray.push(tweet_id, tweet_text, username, created_at, query_id);
+
+                              // bulk insert in Sqlite limit at 900
+                              if (rArray.length == 900) {
+                                tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding + ";", rArray);
+                                //reset parameters
+                                rArray = [];
+                                rBinding = "";
+                              } else {
+                                rBinding += ",";
+                              }
+                            });
+
+                            // send the rest
+                            if (rBinding !== "") {
+                              tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding.slice(0, -1) + ";", rArray);
+                            }
+                          }, function(error) {
+                            console.log('Transaction ERROR: ' + error.message);
+                          }, function(tx) {
+                            console.log('Added ' + data.remoteTweets.length + ' remote tweets to local database');
+                          });
                         }
                       });
-                      tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + binding + ";", tArray);
-                    }, function(error) {
-                      console.log('Transaction ERROR: ' + error.message);
-                    }, function(tx) {
-                      console.log('Added ' + data.tweets.length + ' tweets to local database');
+                    } else {
                       // add remoteTweets to local DB
                       if (data.remoteTweets.length !== 0) {
                         myDB.transaction(function(tx) {
@@ -189,56 +215,53 @@ var app = {
                           console.log('Added ' + data.remoteTweets.length + ' remote tweets to local database');
                         });
                       }
-                    });
-                  } else {
-                    // add remoteTweets to local DB
-                    if (data.remoteTweets.length !== 0) {
-                      myDB.transaction(function(tx) {
-                        var rBinding = "";
-                        var rArray = [];
-                        data.remoteTweets.forEach(function(tweet, index, array) {
-                          rBinding += "(?,?,?,?,?)";
-                          var tweet_id = tweet.tweet_id; // tweet id
-                          var tweet_text = tweet.tweet_text // tweet text
-                          var username = tweet.username // screen name of user who tweeted it
-                          var created_at = new Date(tweet.created_at) // when user tweeted it
-                          rArray.push(tweet_id, tweet_text, username, created_at, query_id);
-
-                          // bulk insert in Sqlite limit at 900
-                          if (rArray.length == 900) {
-                            tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding + ";", rArray);
-                            //reset parameters
-                            rArray = [];
-                            rBinding = "";
-                          } else {
-                            rBinding += ",";
-                          }
-                        });
-
-                        // send the rest
-                        if (rBinding !== "") {
-                          tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding.slice(0, -1) + ";", rArray);
-                        }
-                      }, function(error) {
-                        console.log('Transaction ERROR: ' + error.message);
-                      }, function(tx) {
-                        console.log('Added ' + data.remoteTweets.length + ' remote tweets to local database');
-                      });
                     }
+
+                    // Display tweets
+                    $("#tweetsPanel").attr("hidden", null);
+                    document.getElementById('tweetsResult').innerHTML = '';
+                    if (data.tweets.length !== 0) {
+                      tweetsArray = data.tweets;
+                      $("#tweetsResult").append('<button style="display: block; margin-bottom: 40px;" class="btn btn-primary search-button" id="btnToggle" role="button" data-toggle="collapse" data-target="#apiTweets" aria-expanded="false" aria-controls="apiTweets">Show ' + tweetsArray.length + ' new tweets from API <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
+                      $("#tweetsResult").append('<div class="collapse" id="apiTweets"></div>');
+                      // $("#tweetsResult").append('<div class="alert alert-info" role="alert">Number of tweets from the API: ' + tweetsArray.length + '</div>');
+                      for (t = 0 ; t < tweetsArray.length ; t++) {
+                        var created_at = tweetsArray[t].created_at;
+                        // $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
+                        // $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
+                        // $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
+
+                        $("#apiTweets").append('<div class="panel panel-default"> \
+                                              <div class="panel-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div> \
+                                              <div class="panel-body"><a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank">' + tweetsArray[t].text + '</a></div> \
+                                              <div class="panel-footer">Time and date: ' + created_at + '</div> </div>');
+                      }
+                    } else {
+                      $("#tweetsResult").append('<button style="display: block; margin-bottom: 40px;" class="btn btn-primary search-button" disabled>There is 0 new tweet from API <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
+                    }
+
+                    if (data.dbTweets) {
+                      dbTweetsArray = data.dbTweets;
+                      // $("#tweetsResult").append('<div class="alert alert-info" role="alert">Last 100 tweets from the database </div>');
+                      $("#tweetsResult").append('<button style="display: block; margin-bottom: 40px;" class="btn btn-primary search-button" id="btnToggle" role="button" data-toggle="collapse" data-target="#dbTweets" aria-expanded="false" aria-controls="dbTweets">Show last 100 tweets from the database <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
+                      $("#tweetsResult").append('<div class="collapse" id="dbTweets"></div>');
+                      for (t = 0 ; t < dbTweetsArray.length ; t++) {
+                        var created_at = dbTweetsArray[t].created_at;
+                        // $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + dbTweetsArray[t].username + '" target="_blank">@' + dbTweetsArray[t].username + '</a></div></div></div>');
+                        // $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + dbTweetsArray[t].username + '/status/' + dbTweetsArray[t].tweet_id + '" target="_blank"><div class="tweet-link-div">' + dbTweetsArray[t].tweet_text + '</div></a>');
+                        // $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
+
+                        $("#dbTweets").append('<div class="panel panel-default"> \
+                                              <div class="panel-heading"><a href="https://www.twitter.com/' + dbTweetsArray[t].username + '" target="_blank">@' + dbTweetsArray[t].username + '</a></div> \
+                                              <div class="panel-body"><a class="tweet-text" href="https://www.twitter.com/' + dbTweetsArray[t].username + '/status/' + dbTweetsArray[t].tweet_id + '" target="_blank">' + dbTweetsArray[t].tweet_text + '</a></div> \
+                                              <div class="panel-footer">Time and date: ' + created_at + '</div> </div>');
+                      }
+                    }
+                  } else {
+                    $("#tweetsPanel").attr("hidden", null);
+                    document.getElementById('tweetsResult').innerHTML = '';
+                    $("#tweetsResult").append('<div class="alert alert-info" role="alert">No tweet found</div>');
                   }
-                  //
-                  // // Display tweets
-                  // var tweetsArray = data.tweets;
-                  // // console.log(tweetsArray);
-                  // $("#tweetsPanel").attr("hidden", null);
-                  // $("#tweetsPanel").empty();
-                  // for (t = 0 ; t < tweetsArray.length ; t++) {
-                  //   var created_at = tweetsArray[t].created_at ;
-                  //   //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
-                  //   $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
-                  //   $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
-                  //   $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
-                  // }
                 },
                 fail: function(err) {
                   console.error(err);
@@ -295,7 +318,7 @@ function splitQuery(queryString) {
     }
   }
   return fullQuery;
- }
+}
 
 
 var myDB;
