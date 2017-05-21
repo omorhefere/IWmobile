@@ -59,7 +59,7 @@ var app = {
       var queryOption;
 
         $.ajax({
-          url: "http://143.167.146.242:3000/api/search?" + $(this).serialize(),
+          url: "http://143.167.146.214:3000/api/search?" + $(this).serialize(),
           data: {
             player: $('#playerName').val(),
             queryOption: $('input[id=queryOption]:checked').val(),
@@ -103,7 +103,6 @@ var app = {
               }
 
             dbTweetsArray = data.dbTweets;
-            console.log(dbTweetsArray[0])
               for (t = 0 ; t < dbTweetsArray.length ; t++){
                 var created_at = dbTweetsArray[t].created_at ;
                 //$("#tweetsResult").append("<ul> <li>" + tweetsArray[t].user.screen_name + "</li> </ul>");
@@ -111,6 +110,21 @@ var app = {
                 $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + dbTweetsArray[t].username + '/status/' + dbTweetsArray[t].tweet_id + '" target="_blank"><div class="tweet-link-div">' + dbTweetsArray[t].tweet_text + '</div></a>');
                 $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
               }
+            if (data.DBpediaInfo !== undefined){
+              console.log(data.DBpediaInfo + "Got info")
+              $("#dbtab").attr("hidden", null);
+              var old_html = $("#dbinfo").html();
+              document.getElementById('dbinfo').innerHTML = '';
+              $("#dbinfo").append('<div class="col-xs-12"><h1 class="db-heading">' + data.DBpediaInfo.playerInfo[0].name + ' </h1><p> ' + data.DBpediaInfo.playerInfo[1].dob + ' <p><h3> ' + data.DBpediaInfo.playerInfo[2].team + '</h3><h4> ' + data.DBpediaInfo.playerInfo[3].position + '</h4></div>');
+              console.log("passed append bit")
+
+            }
+            else{
+              $("#dbtab").attr("hidden", true);
+              var old_html = $("#dbinfo").html();
+              document.getElementById('dbinfo').innerHTML = '';
+            }
+
 
             //$("#tweetsPanel").attr("hidden", null);
             //$("#tweetsResult").append("<ul>" + tweets + "</ul>");
@@ -134,7 +148,7 @@ var app = {
 
     $('#btnTest').on('click', function(e) {
       e.preventDefault();
-      $.ajax({url: "http://143.167.146.242:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
+      $.ajax({url: "http://143.167.146.214:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
         alert(data.message);
         console.log(data);
       }).fail(function(err) {
