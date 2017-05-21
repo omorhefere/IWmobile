@@ -225,8 +225,10 @@ var app = {
                       $("#tweetsResult").append('<button style="display: block; margin-bottom: 40px;" class="btn btn-primary search-button" id="btnToggle" role="button" data-toggle="collapse" data-target="#apiTweets" aria-expanded="false" aria-controls="apiTweets">Show ' + tweetsArray.length + ' new tweets from API <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
                       $("#tweetsResult").append('<div class="collapse" id="apiTweets"></div>');
                       // $("#tweetsResult").append('<div class="alert alert-info" role="alert">Number of tweets from the API: ' + tweetsArray.length + '</div>');
-                      for (t = 0 ; t < tweetsArray.length ; t++) {
-                        var created_at = tweetsArray[t].created_at;
+                        for (t = 0 ; t < tweetsArray.length ; t++) {
+                        var created_at = new Date(tweetsArray[t].created_at);
+                        var dateString = formatDate(created_at.getUTCDate()) + '-' + formatDate(created_at.getUTCMonth()) + '-' + created_at.getUTCFullYear() + ' ' + formatDate(created_at.getUTCHours()) + ':' + formatDate(created_at.getUTCMinutes());
+
                         // $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div></div></div>');
                         // $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank"><div class="tweet-link-div">' + tweetsArray[t].text + '</div></a>');
                         // $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
@@ -234,7 +236,7 @@ var app = {
                         $("#apiTweets").append('<div class="panel panel-default"> \
                                               <div class="panel-heading"><a href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '" target="_blank">@' + tweetsArray[t].user.screen_name + '</a></div> \
                                               <div class="panel-body"><a class="tweet-text" href="https://www.twitter.com/' + tweetsArray[t].user.screen_name + '/status/' + tweetsArray[t].id_str + '" target="_blank">' + tweetsArray[t].text + '</a></div> \
-                                              <div class="panel-footer">Time and date: ' + created_at + '</div> </div>');
+                                              <div class="panel-footer">Time and date: ' + dateString + '</div> </div>');
                       }
                     } else {
                       $("#tweetsResult").append('<button style="display: block; margin-bottom: 40px;" class="btn btn-primary search-button" disabled>There is 0 new tweet from API <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
@@ -246,7 +248,8 @@ var app = {
                       $("#tweetsResult").append('<button style="display: block; margin-bottom: 40px;" class="btn btn-primary search-button" id="btnToggle" role="button" data-toggle="collapse" data-target="#dbTweets" aria-expanded="false" aria-controls="dbTweets">Show last 100 tweets from the database <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
                       $("#tweetsResult").append('<div class="collapse" id="dbTweets"></div>');
                       for (t = 0 ; t < dbTweetsArray.length ; t++) {
-                        var created_at = dbTweetsArray[t].created_at;
+                        var created_at = new Date(dbTweetsArray[t].created_at);
+                        var dateString = formatDate(created_at.getUTCDate()) + '-' + formatDate(created_at.getUTCMonth()) + '-' + created_at.getUTCFullYear() + ' ' + formatDate(created_at.getUTCHours()) + ':' + formatDate(created_at.getUTCMinutes());
                         // $("#tweetsResult").append('<div class="tweet-container"><div class="tweet-box"><div class="tweet-heading"><a href="https://www.twitter.com/' + dbTweetsArray[t].username + '" target="_blank">@' + dbTweetsArray[t].username + '</a></div></div></div>');
                         // $("#tweetsResult").append('<a class="tweet-text" href="https://www.twitter.com/' + dbTweetsArray[t].username + '/status/' + dbTweetsArray[t].tweet_id + '" target="_blank"><div class="tweet-link-div">' + dbTweetsArray[t].tweet_text + '</div></a>');
                         // $("#tweetsResult").append('<div class="tweet-footer"><p> Time and date: ' + created_at + ' </p></div>');
@@ -254,7 +257,7 @@ var app = {
                         $("#dbTweets").append('<div class="panel panel-default"> \
                                               <div class="panel-heading"><a href="https://www.twitter.com/' + dbTweetsArray[t].username + '" target="_blank">@' + dbTweetsArray[t].username + '</a></div> \
                                               <div class="panel-body"><a class="tweet-text" href="https://www.twitter.com/' + dbTweetsArray[t].username + '/status/' + dbTweetsArray[t].tweet_id + '" target="_blank">' + dbTweetsArray[t].tweet_text + '</a></div> \
-                                              <div class="panel-footer">Time and date: ' + created_at + '</div> </div>');
+                                              <div class="panel-footer">Time and date: ' + dateString + '</div> </div>');
                       }
                     }
                   } else {
@@ -320,6 +323,13 @@ function splitQuery(queryString) {
   return fullQuery;
 }
 
+function formatDate(number) {
+  var x = number.toString();
+  if (x.length === 1) {
+    x = '0' + x;
+  }
+  return x;
+}
 
 var myDB;
 app.initialize();
