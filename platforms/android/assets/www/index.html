@@ -45,7 +45,8 @@
             <div class="panel-body">
               <form method="POST" id="form">
                 <div class="form-group">
-                  <input type="text" class="form-control" name="player" id="playerName" placeholder="Player (eg. Rooney, @waynerooney)">
+                  <label for="playerName">Player</label>
+                  <input type="text" class="form-control" name="player" id="playerName" placeholder="eg. Rooney, @waynerooney">
                 </div>
                 <div class="radio">
                   <label class="radio-inline">
@@ -56,16 +57,28 @@
                   </label>
                 </div>
                 <div class="form-group">
-                  <input type="text" class="form-control" name="team" id="teamName" placeholder="Team (eg. @manutd, #manutd)">
+                  <label for="teamName">Team</label>
+                  <input type="text" class="form-control" name="team" id="teamName" placeholder="eg. @manutd, #manutd">
+                </div>
+                <div class="radio">
+                  <label class="radio-inline">
+                    <input type="radio" name="fromOption" value="AND" checked> AND
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="fromOption" value="OR"> OR
+                  </label>
                 </div>
                 <div class="form-group">
-                  <input type="text" class="form-control" name="author" id="authorName" placeholder="Author (eg.@waynerooney)">
+                  <label for="authorName">From this account</label>
+                  <input type="text" class="form-control" name="author" id="authorName" placeholder="eg.@WayneRooney">
                 </div>
                 <p>
                   <button type="submit" class="btn btn-primary search-button">Search</button>
+                </p>
+                <p>
                   <button type="button" class="btn btn-primary" id="btnTest">Test Connection</button>
                   <button type="button" class="btn btn-danger" id="btnDrop">Delete tables</button>
-                </p>
+                </P>
               </form>
             </div>
           </div>

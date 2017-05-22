@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,7 +15,11 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+
+ * @author Thanh Trung, Omorhefere Imoloame and Mahesha Kulatunga
+ * @version 1.0.0
  */
+
 var app = {
   // Application Constructor
   initialize: function() {
@@ -33,6 +37,7 @@ var app = {
   // Update DOM on a Received Event
   receivedEvent: function(id) {
     myDB = window.sqlitePlugin.openDatabase({name: "iwmobile.db", location: 'default'});
+    // Create "tweet" and "query" tables if they are not already existed
     myDB.transaction(function(tx) {
       tx.executeSql('CREATE TABLE IF NOT EXISTS query (query_id INTEGER PRIMARY KEY UNIQUE NOT NULL ,\
             query_text TEXT NOT NULL,\
@@ -54,6 +59,7 @@ var app = {
       console.log('Populated database OK');
     });
 
+    // Process submitted search form
     $("#form").on("submit", function(e) {
       e.preventDefault();
 
@@ -61,20 +67,22 @@ var app = {
       var basicKW = 'transfer OR buy OR bid OR moving OR move';
       var query = basicKW;
       var queryOption = $('input[id=queryOption]:checked').val();
+      var fromOption = $('input[id=fromOption]:checked').val();
       var player = $('#playerName').val();
       var team = $('#teamName').val();
       var author = $('#authorName').val();
+      // Add player to query
       if (player.length !== 0) {
           query = query + ' AND ' + splitQuery(player);
       }
-
+      // Add player to query
       if (team.length !== 0) {
           query = query + ' ' + queryOption +  ' ' + splitQuery(team);
       }
-
+      // Add author to query
       if (author.length !== 0) {
           author = author.replace(/@/g, "")
-          query = query + ' from:' + author; // add author to query
+          query = query + ' ' + fromOption + ' from:' + author; // add author to query
       }
 
       // Find the number of local tweets from the given query
@@ -89,11 +97,13 @@ var app = {
               console.log(rs1.rows.length);
               var localTweets = rs1.rows.length;
 
+              // Ajax POST request to an API end point in web server
               $.ajax({
-                url: "http://143.167.217.34:3000/api/search",
+                url: "http://192.168.0.49:3000/api/search",
                 data: {
                   player: player,
                   queryOption: queryOption,
+                  fromOption: fromOption,
                   team: team,
                   author: author,
                   localTweets: localTweets
@@ -126,7 +136,7 @@ var app = {
                     }
 
                     // Save tweets to local DB
-                    if (data.tweets.length !== 0) {
+                    if (data.tweets.length !== 0) { // If there are new tweets from the API, save them first then tweets from remote DB are next
                       myDB.transaction(function(tx) {
                         var tArray = [];
                         var binding = "(?,?,?,?,?)";
@@ -145,7 +155,7 @@ var app = {
                         console.log('Transaction ERROR: ' + error.message);
                       }, function(tx) {
                         console.log('Added ' + data.tweets.length + ' tweets to local database');
-                        // add remoteTweets to local DB
+                        // Add remoteTweets to local DB
                         if (data.remoteTweets.length !== 0) {
                           myDB.transaction(function(tx) {
                             var rBinding = "";
@@ -158,10 +168,10 @@ var app = {
                               var created_at = new Date(tweet.created_at) // when user tweeted it
                               rArray.push(tweet_id, tweet_text, username, created_at, query_id);
 
-                              // bulk insert in Sqlite limit at 900
+                              // Bulk insert in Sqlite limit at 900. More info: https://github.com/litehelpers/Cordova-sqlite-storage/issues/282
                               if (rArray.length == 900) {
                                 tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding + ";", rArray);
-                                //reset parameters
+                                // Reset parameters
                                 rArray = [];
                                 rBinding = "";
                               } else {
@@ -169,7 +179,7 @@ var app = {
                               }
                             });
 
-                            // send the rest
+                            // Send the rest
                             if (rBinding !== "") {
                               tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding.slice(0, -1) + ";", rArray);
                             }
@@ -180,8 +190,8 @@ var app = {
                           });
                         }
                       });
-                    } else {
-                      // add remoteTweets to local DB
+                    } else { // else, save only tweets from the remote DB
+                      // Add remoteTweets to local DB
                       if (data.remoteTweets.length !== 0) {
                         myDB.transaction(function(tx) {
                           var rBinding = "";
@@ -194,10 +204,10 @@ var app = {
                             var created_at = new Date(tweet.created_at) // when user tweeted it
                             rArray.push(tweet_id, tweet_text, username, created_at, query_id);
 
-                            // bulk insert in Sqlite limit at 900
+                            // Bulk insert in Sqlite limit at 900. More info: https://github.com/litehelpers/Cordova-sqlite-storage/issues/282
                             if (rArray.length == 900) {
                               tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding + ";", rArray);
-                              //reset parameters
+                              // Reset parameters
                               rArray = [];
                               rBinding = "";
                             } else {
@@ -205,7 +215,7 @@ var app = {
                             }
                           });
 
-                          // send the rest
+                          // Send the rest
                           if (rBinding !== "") {
                             tx.executeSql("INSERT INTO tweet (tweet_id, tweet_text, username, created_at, query_id) VALUES " + rBinding.slice(0, -1) + ";", rArray);
                           }
@@ -217,14 +227,13 @@ var app = {
                       }
                     }
 
-                    // Display tweets
+                    // Display new tweets from the Twitter API
                     $("#tweetsPanel").attr("hidden", null);
                     document.getElementById('tweetsResult').innerHTML = '';
                     if (data.tweets.length !== 0) {
                       tweetsArray = data.tweets;
                       $("#tweetsResult").append('<button style="display: block; margin-bottom: 20px; margin-top: 20px;" class="btn btn-primary search-button" id="btnToggle" role="button" data-toggle="collapse" data-target="#apiTweets" aria-expanded="false" aria-controls="apiTweets">Show ' + tweetsArray.length + ' new tweets from API <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
                       $("#tweetsResult").append('<div class="collapse" id="apiTweets"></div>');
-                      // $("#tweetsResult").append('<div class="alert alert-info" role="alert">Number of tweets from the API: ' + tweetsArray.length + '</div>');
                         for (t = 0 ; t < tweetsArray.length ; t++) {
                         var created_at = new Date(tweetsArray[t].created_at);
                         var dateString = formatDate(created_at.getUTCDate()) + '-' + formatDate(created_at.getUTCMonth()) + '-' + created_at.getUTCFullYear() + ' ' + formatDate(created_at.getUTCHours()) + ':' + formatDate(created_at.getUTCMinutes());
@@ -242,9 +251,9 @@ var app = {
                       $("#tweetsResult").append('<button style="display: block; margin-bottom: 20px; margin-top: 20px;" class="btn btn-primary search-button" disabled>There is 0 new tweet from API <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
                     }
 
+                    // Display last 100 tweets from the DB
                     if (data.dbTweets) {
                       dbTweetsArray = data.dbTweets;
-                      // $("#tweetsResult").append('<div class="alert alert-info" role="alert">Last 100 tweets from the database </div>');
                       $("#tweetsResult").append('<button style="display: block; margin-bottom: 20px;" class="btn btn-primary search-button" id="btnToggle" role="button" data-toggle="collapse" data-target="#dbTweets" aria-expanded="false" aria-controls="dbTweets">Show last 100 tweets from the database <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
                       $("#tweetsResult").append('<div class="collapse" id="dbTweets"></div>');
                       for (t = 0 ; t < dbTweetsArray.length ; t++) {
@@ -261,9 +270,9 @@ var app = {
                       }
                     }
 
-                    //Show the graph
+                    // Show the graph
                     showGraph(data);
-                    //Show the dbPedia info
+                    // Show the dbPedia info
                     showDBPInfo(data);
                   } else {
                     $("#tweetsPanel").attr("hidden", null);
@@ -285,6 +294,7 @@ var app = {
       });
 
     });
+
 
     $('#btnTest').on('click', function(e) {
       e.preventDefault();
@@ -314,10 +324,16 @@ var app = {
   }
 };
 
+/**
+ * Contruct query from a given player/team query.
+ * @param {string} queryString - Array of unique dates.
+ * @return Arrays of classified tweets.
+ */
 function splitQuery(queryString) {
-  var words = queryString.split(",");
+  var words = queryString.split(","); // split at comma
   var fullQuery = "";
 
+  // Contruct query string
   for (var i = 0; i < words.length; i++) {
     if (i === words.length - 1) {
       fullQuery = fullQuery + words[i];
@@ -328,6 +344,11 @@ function splitQuery(queryString) {
   return fullQuery;
 }
 
+/**
+ * Format a given date-related string such as date, month, hour, minute
+ * @param {integer} number - date/month/hour/minute
+ * @return Formatted string
+ */
 function formatDate(number) {
   var x = number.toString();
   if (x.length === 1) {
@@ -336,6 +357,10 @@ function formatDate(number) {
   return x;
 }
 
+/**
+ * Display DBPedia info
+ * @param {json} data - JSON data returned from the AJAX request
+ */
 function showDBPInfo(data) {
   if (data.DBpediaInfo !== undefined) {
     $("#dbtab").attr("hidden", null);
@@ -349,15 +374,18 @@ function showDBPInfo(data) {
   }
 }
 
+/**
+ * Display graph via Chartjs
+ * @param {json} data - JSON data returned from the AJAX request
+ */
 function showGraph(data) {
   $("#graphtab").attr("hidden", null);
-  var dates = []
-  var freqs = []
-
+  var dates = [];
+  var freqs = [];
 
   for (group = 0 ; group < data.classifiedTweets.length ; group++) {
     var date = new Date(data.classifiedTweets[group][0].created_at).toDateString();
-    var freq = data.classifiedTweets[group].length
+    var freq = data.classifiedTweets[group].length;
     dates.push(date);
     freqs.push(freq);
   }

@@ -61,6 +61,7 @@ var app = {
       var basicKW = 'transfer OR buy OR bid OR moving OR move';
       var query = basicKW;
       var queryOption = $('input[id=queryOption]:checked').val();
+      var fromOption = $('input[id=fromOption]:checked').val();
       var player = $('#playerName').val();
       var team = $('#teamName').val();
       var author = $('#authorName').val();
@@ -74,7 +75,7 @@ var app = {
 
       if (author.length !== 0) {
           author = author.replace(/@/g, "")
-          query = query + ' from:' + author; // add author to query
+          query = query + ' ' + fromOption + ' from:' + author; // add author to query
       }
 
       // Find the number of local tweets from the given query
@@ -90,10 +91,11 @@ var app = {
               var localTweets = rs1.rows.length;
 
               $.ajax({
-                url: "http://143.167.217.34:3000/api/search",
+                url: "http://192.168.0.49:3000/api/search",
                 data: {
                   player: player,
                   queryOption: queryOption,
+                  fromOption: fromOption,
                   team: team,
                   author: author,
                   localTweets: localTweets
