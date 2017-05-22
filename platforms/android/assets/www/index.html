@@ -30,6 +30,7 @@
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
         <link rel="stylesheet" type="text/css" href='css/bootstrap.min.css'>
         <link rel="stylesheet" type="text/css" href="css/index.css">
         <title>Football Tweets</title>
@@ -70,41 +71,41 @@
           </div>
         </div>
       </div>
-      <div class="extra-info">
 
-<!--  EXTRA INFO -->
-  <div class="panel-group" id="accordion">
-    <div class="panel panel-default">
-      <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
-      <div class="panel-heading">
-        <h4 class="panel-title" style="text-decoration: none !important;">
-          Graph
-        </h4>
+      <!--  EXTRA INFO -->
+      <div class="panel-group" id="accordion">
+        <div class="panel panel-default" id="graphtab" hidden>
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" class="tab-link">
+            <div class="panel-heading">
+              <h4 class="panel-title" style="text-decoration: none !important;">
+                Freaquency Analysis
+              </h4>
+            </div>
+          </a>
+          <div id="collapse1" class="panel-collapse collapse">
+            <div class="panel-body">
+              <canvas id="freqGraph"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default" id="dbtab" hidden>
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse2" class="tab-link">
+            <div class="panel-heading">
+              <h4 class="panel-title" style="text-decoration: none !important;">
+                Player info
+              </h4>
+            </div>
+          </a>
+          <div id="collapse2" class="panel-collapse collapse">
+            <div class="panel-body">
+              <div  id="dbinfo"></div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
-      <div id="collapse1" class="panel-collapse collapse">
 
-        <div class="panel-body"></div>
-
-      </div>
-    </div>
-    <div class="panel panel-default">
-      <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
-      <div class="panel-heading">
-        <h4 class="panel-title" style="text-decoration: none !important;">
-          Player info
-        </h4>
-      </div>
-    </a>
-      <div id="collapse2" class="panel-collapse collapse">
-
-        <div class="panel-body"></div>
-
-      </div>
-    </div>
-      </div>
       <!-- TWEETS -->
-        <div class="container" id="tweetsPanel" hidden>
+        <div class="tweetsContainer" id="tweetsPanel" hidden>
             <h2>Search results</h2>
             <div  id="tweetsResult">
             </div>
