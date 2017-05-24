@@ -24,6 +24,7 @@ var app = {
   // Application Constructor
   initialize: function() {
     document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+    document.getElementById('touch-button').addEventListener('touchstart', function(){return true}, false) //Event listeners to detect 'button:active' events
   },
 
   // deviceready Event Handler
@@ -33,6 +34,7 @@ var app = {
   onDeviceReady: function() {
     this.receivedEvent('deviceready');
   },
+
 
   // Update DOM on a Received Event
   receivedEvent: function(id) {
@@ -99,7 +101,7 @@ var app = {
 
                 // Ajax POST request to an API end point in web server
                 $.ajax({
-                  url: "http://143.167.144.226:3000/api/search",
+                  url: "http://143.167.146.162:3000/api/search",
                   data: {
                     player: player,
                     queryOption: queryOption,
@@ -232,7 +234,8 @@ var app = {
                       document.getElementById('tweetsResult').innerHTML = '';
                       if (data.tweets.length !== 0) {
                         tweetsArray = data.tweets;
-                        $("#tweetsResult").append('<button style="display: block; margin-bottom: 10%;" class="btn btn-primary tweet-tab" id="btnToggle" role="button" data-toggle="collapse" data-target="#apiTweets" aria-expanded="false" aria-controls="apiTweets" ontouchstart="return true;">Show ' + tweetsArray.length + ' new tweets <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
+                        $("#tweetsResult").append('<button style="display: block; margin-bottom: 10%;" class="btn btn-primary tweet-tab" id="btnToggle" role="button" data-toggle="collapse" data-target="#apiTweets" aria-expanded="false" aria-controls="apiTweets"">Show ' + tweetsArray.length + ' new tweets <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
+                        document.getElementById('btnToggle').addEventListener('touchstart', function(){return true}, false) //Event listeners to detect 'button:active' events
                         $("#tweetsResult").append('<div class="collapse" id="apiTweets"></div>');
                           for (t = 0 ; t < tweetsArray.length ; t++) {
                           var created_at = new Date(tweetsArray[t].created_at);
@@ -250,7 +253,8 @@ var app = {
                       // Display last 100 tweets from the DB
                       if (data.dbTweets) {
                         dbTweetsArray = data.dbTweets;
-                        $("#tweetsResult").append('<button style="display: block;  margin-bottom: 10%;" class="btn btn-primary tweet-tab" id="btnToggle" role="button" data-toggle="collapse" data-target="#dbTweets" aria-expanded="false" aria-controls="dbTweets" ontouchstart="return true;">Show last 100 tweets from our database <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
+                        $("#tweetsResult").append('<button style="display: block;  margin-bottom: 10%;" class="btn btn-primary tweet-tab" id="btnToggle" role="button" data-toggle="collapse" data-target="#dbTweets" aria-expanded="false" aria-controls="dbTweets"">Show last 100 tweets from our database <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span></button>');
+                        document.getElementById('btnToggle').addEventListener('touchstart', function(){return true}, false) //Event listeners to detect 'button:active' events
                         $("#tweetsResult").append('<div class="collapse" id="dbTweets"></div>');
                         for (t = 0 ; t < dbTweetsArray.length ; t++) {
                           var created_at = new Date(dbTweetsArray[t].created_at);
@@ -295,7 +299,7 @@ var app = {
 
     $('#btnTest').on('click', function(e) {
       e.preventDefault();
-      $.ajax({url: "http://143.167.144.226:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
+      $.ajax({url: "http://143.167.146.162:3000/api/tweet", dataType: "json", method: "GET"}).done(function(data) {
         alert(data.message);
         console.log(data);
       }).fail(function(err) {
@@ -391,7 +395,7 @@ function showGraph(data) {
     type: 'line',
     responsive: true,
     data: {
-      labels: dates.reverse(),
+      labels: dates,
       datasets: [{
         label: 'Number of Tweets',
         data: freqs,
