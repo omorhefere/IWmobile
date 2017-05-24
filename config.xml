@@ -23,7 +23,7 @@
         <icon qualifier="hdpi" src="res/icons/android/icon-72-hdpi.png"/>
         <icon qualifier="xhdpi" src="res/icons/android/icon-96-xhdpi.png"/>
         <icon qualifier="xxhdpi" src="res/icons/android/icon-144-xxhdpi.png"/>
-<icon qualifier="xxxhdpi" src="res/icons/android/icon-192-xxxhdpi.png"/>
+        <icon qualifier="xxxhdpi" src="res/icons/android/icon-192-xxxhdpi.png"/>
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
